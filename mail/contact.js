@@ -1,65 +1,35 @@
-$(function () {
+(function() {
+    emailjs.init("FAmo7pFfOdZia3u4J"); // Replace with your EmailJS User ID
+})();
 
-    $("#contactForm input, #contactForm textarea").jqBootstrapValidation({
-        preventSubmit: true,
-        submitError: function ($form, event, errors) {
-        },
-        submitSuccess: function ($form, event) {
-            event.preventDefault();
-            var name = $("input#name").val();
-            var email = $("input#email").val();
-            var subject = $("input#subject").val();
-            var message = $("textarea#message").val();
+document.getElementById("contactForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevent the default form submission
 
-            $this = $("#sendMessageButton");
-            $this.prop("disabled", true);
+    // Get form values
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const subject = document.getElementById("subject").value;
+    const message = document.getElementById("message").value;
 
-            $.ajax({
-                url: "contact.php",
-                type: "POST",
-                data: {
-                    name: name,
-                    email: email,
-                    subject: subject,
-                    message: message
-                },
-                cache: false,
-                success: function () {
-                    $('#success').html("<div class='alert alert-success'>");
-                    $('#success > .alert-success').html("<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;")
-                            .append("</button>");
-                    $('#success > .alert-success')
-                            .append("<strong>Your message has been sent. </strong>");
-                    $('#success > .alert-success')
-                            .append('</div>');
-                    $('#contactForm').trigger("reset");
-                },
-                error: function () {
-                    $('#success').html("<div class='alert alert-danger'>");
-                    $('#success > .alert-danger').html("<button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;")
-                            .append("</button>");
-                    $('#success > .alert-danger').append($("<strong>").text("Sorry " + name + ", it seems that our mail server is not responding. Please try again later!"));
-                    $('#success > .alert-danger').append('</div>');
-                    $('#contactForm').trigger("reset");
-                },
-                complete: function () {
-                    setTimeout(function () {
-                        $this.prop("disabled", false);
-                    }, 1000);
-                }
-            });
-        },
-        filter: function () {
-            return $(this).is(":visible");
-        },
-    });
+    // Prepare the template parameters
+    const templateParams = {
+        to_name: 'Vinay', // Replace with the actual recipient name
+        from_name: name,
+        subject: subject,
+        message: message,
+        reply_to: email
+    };
 
-    $("a[data-toggle=\"tab\"]").click(function (e) {
-        e.preventDefault();
-        $(this).tab("show");
-    });
-});
-
-$('#name').focus(function () {
-    $('#success').html('');
+    // Send the email using EmailJS
+    emailjs.send('FAmo7pFfOdZia3u4J', 'template_gb2vl84', templateParams)
+        .then(function(response) {
+            document.getElementById("success").innerHTML = "Your message has been sent!";
+            document.getElementById("success").style.display = "block";
+            document.getElementById("error").style.display = "none";
+            document.getElementById("contactForm").reset(); // Reset the form
+        }, function(error) {
+            document.getElementById("error").innerHTML = "There was an error sending your message. Please try again later.";
+            document.getElementById("error").style.display = "block";
+            console.error("Failed to send email. Error: ", error);
+        });
 });
